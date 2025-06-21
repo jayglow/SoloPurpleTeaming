@@ -8,30 +8,145 @@
   <ArchiveDirectory>Sysmon</ArchiveDirectory>
   <!-- Sets the name of the directory in the C:\ root where preserved files will be saved (String)-->
   <EventFiltering>
-    <ProcessCreate onmatch="include" />
-    <FileCreateTime onmatch="include" />
-    <NetworkConnect onmatch="include" />
-    <SysmonState onmatch="include" />
-    <ProcessTerminate onmatch="include" />
-    <DriverLoad onmatch="include" />
-    <ImageLoad onmatch="include" />
-    <CreateRemoteThread onmatch="include" />
-    <RawAccessRead onmatch="include" />
-    <ProcessAccess onmatch="include" />
-    <FileCreate onmatch="include" />
-    <RegistryEvent onmatch="include" />
-    <FileCreateStreamHash onmatch="include" />
-    <PipeEvent onmatch="include" />
-    <WmiEvent onmatch="include" />
-    <DnsQuery onmatch="include" />
-    <FileDelete onmatch="include" />
-    <ClipboardChange onmatch="include" />
-    <ProcessTampering onmatch="include" />
-    <FileDeleteDetected onmatch="include" />
-    <FileBlock onmatch="include" />
-    <FileShred onmatch="include" />
-    <FileCopy onmatch="include" />
-    <ProcessTrust onmatch="include" />
-    <FileDeleteLogged onmatch="include" />
+    <!-- Event ID 1 == Process Creation - Includes -->
+    <RuleGroup groupRelation="or">
+      <ProcessCreate onmatch="include">
+      </ProcessCreate>
+    </RuleGroup>
+    <!-- Event ID 2 == File Creation Time - Includes -->
+    <RuleGroup groupRelation="or">
+      <FileCreateTime onmatch="include">
+      </FileCreateTime>
+    </RuleGroup>
+    <!-- Event ID 3 == Network Connection - Includes -->
+    <RuleGroup groupRelation="or">
+      <NetworkConnect onmatch="include">
+      </NetworkConnect>
+    </RuleGroup>
+    <!-- Event ID 5 == Process Terminated - Includes -->
+    <RuleGroup groupRelation="or">
+      <ProcessTerminate onmatch="include">
+
+      </ProcessTerminate>
+    </RuleGroup>
+    <!-- Event ID 6 == Driver Loaded - Excludes -->
+    <RuleGroup groupRelation="or">
+      <!--Default to log all and exclude only valid signed Microsoft or Intel drivers-->
+      <DriverLoad onmatch="include">
+        
+      </DriverLoad>
+    </RuleGroup>
+    <!-- Event ID 7 == Image Loaded - Includes -->
+    <RuleGroup groupRelation="or">
+      <ImageLoad onmatch="include">
+        
+      </ImageLoad>
+    </RuleGroup>
+    <!-- Event ID 8 == CreateRemoteThread - Excludes -->
+    <RuleGroup groupRelation="or">
+      <!--Default to log all and exclude a few common processes-->
+      <CreateRemoteThread onmatch="include">
+      </CreateRemoteThread>
+    </RuleGroup>
+    <!-- Event ID 9 == RawAccessRead - Includes -->
+    <RuleGroup groupRelation="or">
+      <RawAccessRead onmatch="include" />
+    </RuleGroup>
+    <!-- Event ID 10 == ProcessAccess - Includes -->
+
+    <!-- Event ID 10 == ProcessAccess - Includes -->
+    <RuleGroup groupRelation="or">
+      <ProcessAccess onmatch="include">
+        
+      </ProcessAccess>
+    </RuleGroup>
+    <!-- Event ID 11 == FileCreate - Includes -->
+    <RuleGroup groupRelation="or">
+      <FileCreate onmatch="exclude">
+        
+      </FileCreate>
+    </RuleGroup>
+    <!-- Event ID 12,13,14 == RegObject added/deleted, RegValue Set, RegObject Renamed - Includes -->
+    <RuleGroup groupRelation="or">
+      <RegistryEvent onmatch="include">
+        
+      </RegistryEvent>
+    </RuleGroup>
+    <!-- Event ID 15 == FileStream Created - Includes -->
+    <RuleGroup groupRelation="or">
+      <FileCreateStreamHash onmatch="include">
+        
+      </FileCreateStreamHash>
+    </RuleGroup>
+    <!-- Event ID 17,18 == PipeEvent. Log Named pipe created & Named pipe connected - Includes -->
+    <RuleGroup groupRelation="or">
+      <PipeEvent onmatch="include">
+      </PipeEvent>
+    </RuleGroup>
+    <!-- Event ID 19,20,21, == WmiEvent. Log all WmiEventFilter, WmiEventConsumer, WmiEventConsumerToFilter activity - Includes -->
+    <RuleGroup groupRelation="or">
+      <WmiEvent onmatch="include">
+      </WmiEvent>
+    </RuleGroup>
+    <!-- Event ID 22 == DNS Queries and their results Excludes -->
+    <RuleGroup groupRelation="or">
+      <!--Default to log all and exclude a few common processes-->
+      <DnsQuery onmatch="include">
+        
+      </DnsQuery>
+    </RuleGroup>
+    <!-- Event ID 23 == File Delete and overwrite events which saves a copy to the archivedir - Includes -->
+    <!-- Default set to disabled due to disk space implications, enable with care!-->
+    <RuleGroup groupRelation="or">
+      <FileDelete onmatch="include" />
+    </RuleGroup>
+    <!-- Event ID 24 == Clipboard change events, only captures text, not files - Includes -->
+    <!-- Default set to disabled due to privacy implications and potential data you leave for attackers, enable with care!-->
+    <RuleGroup groupRelation="or">
+      <ClipboardChange onmatch="include" />
+    </RuleGroup>
+    <!-- Event ID 25 == Process tampering events - Excludes -->
+    <RuleGroup groupRelation="or">
+      <ProcessTampering onmatch="include">
+        
+      </ProcessTampering>
+    </RuleGroup>
+    <!-- Event ID 26 == File Delete and overwrite events, does NOT save the file - Includes -->
+    <RuleGroup groupRelation="or">
+      <FileDeleteDetected onmatch="include">
+        
+      </FileDeleteDetected>
+    </RuleGroup>
+    <!-- Event ID 27 == File Block Executable and overwrite events - Includes -->
+    <!-- Default set to disabled due to potential unwanted blocks, enable with care!-->
+    <RuleGroup groupRelation="or">
+      <FileBlockExecutable onmatch="include" />
+    </RuleGroup>
+    <!-- Event ID 28 == Fileblock Shredding events - Includes -->
+    <!-- Default set to disabled due to disk space implications, enable with care!-->
+    <RuleGroup groupRelation="or">
+      <FileBlockShredding onmatch="include" />
+    </RuleGroup>
+    <!-- Event ID 29 == File Executable Detected events - Excludes -->
+    <RuleGroup groupRelation="or">
+      <FileExecutableDetected onmatch="include" />
+    </RuleGroup>
+    <RuleGroup groupRelation="or">
+      <CreateRemoteThread onmatch="include">
+      </CreateRemoteThread>
+    </RuleGroup>
+    <RuleGroup groupRelation="or">
+      <WmiEvent onmatch="include" />
+    </RuleGroup>
+    <RuleGroup groupRelation="or">
+      <FileDeleteDetected onmatch="include">
+        
+      </FileDeleteDetected>
+    </RuleGroup>
+    <RuleGroup groupRelation="or">
+      <FileExecutableDetected onmatch="include">
+        
+      </FileExecutableDetected>
+    </RuleGroup>
   </EventFiltering>
 </Sysmon>
