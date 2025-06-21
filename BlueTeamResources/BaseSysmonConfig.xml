@@ -1,1 +1,29 @@
-
+<SysmonSchema version="4.83">
+  <EventFiltering>
+    <ProcessCreate onmatch="include" />
+    <FileCreateTime onmatch="include" />
+    <NetworkConnect onmatch="include" />
+    <SysmonState onmatch="include" />
+    <ProcessTerminate onmatch="include" />
+    <DriverLoad onmatch="include" />
+    <ImageLoad onmatch="include" />
+    <CreateRemoteThread onmatch="include" />
+    <RawAccessRead onmatch="include" />
+    <ProcessAccess onmatch="include" />
+    <FileCreate onmatch="include" />
+    <RegistryEvent onmatch="include" />
+    <FileCreateStreamHash onmatch="include" />
+    <PipeEvent onmatch="include" />
+    <WmiEvent onmatch="include" />
+    <DnsQuery onmatch="include" />
+    <FileDelete onmatch="include" />
+    <ClipboardChange onmatch="include" />
+    <ProcessTampering onmatch="include" />
+    <FileDeleteDetected onmatch="include" />
+    <FileBlock onmatch="include" />
+    <FileShred onmatch="include" />
+    <FileCopy onmatch="include" />
+    <ProcessTrust onmatch="include" />
+    <FileDeleteLogged onmatch="include" />
+  </EventFiltering>
+</SysmonSchema>
