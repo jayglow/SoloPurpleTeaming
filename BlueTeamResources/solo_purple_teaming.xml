@@ -1,0 +1,65 @@
+<!-- Modify it at your will. -->
+<group name="solo_purple_teaming_c2,windows,sysmon">
+	<rule id="100100" level="12">
+		<if_sid>61609</if_sid> 
+		<field name="win.eventdata.ImageLoaded" type="pcre2">(?i)[c-z]:\\\\Users\\\\.+|[c-z]:\\\\Windows\\\\Temp\\\\.+</field>
+		<field name="win.eventdata.Signed">false</field>
+		<description>Unsigned image loaded from user or temp directory</description>
+	</rule>
+	<rule id="100101" level="12">
+		<if_sid>61605</if_sid> 
+		<field name="win.eventdata.DestinationPort">80|443</field>
+        <field name="win.eventdata.Image" type="pcre2">(?i)[c-z]:\\\\Users\\\\.+|[c-z]:\\\\Windows\\\\Temp\\\\.+</field>
+		<description>Network Connect to Common C2 Ports From Downloads or Users</description>
+	</rule>
+	<rule id="100108" level="15">
+		<if_sid>61615</if_sid> 
+		<field name="win.eventdata.targetObject" type="pcre2">(?i)runmru</field>
+        <field name="win.eventdata.details" type="pcre2">(?i)powershell</field>
+		<description>Possible Malicious RunMRU Value Set</description>
+	</rule>
+</group>
+<group name="solo_purple_teaming_c2_correlation">
+    <rule id="100200" level="13" frequency="2" timeframe="2">
+        <if_matched_group>solo_purple_teaming_c2</if_matched_group>
+    <description>Correlation: 100100 and 100101 occurred within 2 seconds. Possible C2 Activity</description>
+  </rule>
+</group>
+<group name="solo_purple_teaming, windows, powershell">
+    <rule id="100103" level="15">
+        <if_sid>91802</if_sid>
+        <match>Reflection</match>
+        <description>Detected Malicious PowerShell Reflection</description>
+    </rule>
+    <rule id="100102" level="15">
+        <if_sid>91802</if_sid>
+        <field name="win.eventdata.scriptBlockText" type="pcre2">(?i)Invoke-Webrequest|iwr</field>
+        <description>Detected Malicious PowerShell - Invoke-WebRequest</description>
+    </rule>
+</group>
+<group name="solo_purple_teaming,windows,sysmon,suspicious_commands">
+  <rule id="100104" level="14">
+    <if_sid>92032</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">.*sc.*(qc|sdshow).*</field>
+    <options>no_full_log</options>
+    <description>Service Enumeration activity spawned via cmd shell execution</description>
+  </rule>
+  <rule id="100107" level="14">
+    <if_sid>92032</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">.*wmic.*service.*get.*</field>
+    <options>no_full_log</options>
+    <description>Service Enumeration activity spawned via cmd shell execution</description>
+  </rule>
+  <rule id="100105" level="13">
+    <if_sid>92032</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">.*net.*localgroup.*administrators.*</field>
+    <options>no_full_log</options>
+    <description>Local group enumeration for administrators activity spawned via cmd shell execution</description>
+  </rule>
+  <rule id="100106" level="13">
+    <if_sid>92032</if_sid>
+    <field name="win.eventdata.commandLine" type="pcre2">.*whoami.*/priv.*</field>
+    <options>no_full_log</options>
+    <description>User privilege enumeration using whoami spawned via cmd shell execution</description>
+  </rule>
+</group>
